@@ -56,7 +56,7 @@
 					<version>1.4.1</version>
 					<executions>
 						<execution>
-							<id>Vmate Check</id>
+							<id>Snail Check</id>
 							<phase>validate</phase>
 							<goals>
 								<goal>enforce</goal>
