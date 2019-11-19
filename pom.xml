@@ -6,18 +6,34 @@
 
 	<groupId>org.snail</groupId>
 	<artifactId>snail-parent</artifactId>
+	<packaging>pom</packaging>
 	<version>1.0.0-SNAPSHOT</version>
+	<modules>
+		<module>raft</module>
+		<module>swim</module>
+		<module>storage</module>
+		<module>cluster</module>
+	</modules>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<java.encoding>UTF-8</java.encoding>
 	</properties>
 	<dependencyManagement>
-
+		<dependencies>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.18.10</version>
+			</dependency>
+		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
