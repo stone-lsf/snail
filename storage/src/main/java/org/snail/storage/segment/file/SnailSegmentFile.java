@@ -1,6 +1,6 @@
 package org.snail.storage.segment.file;
 
-import org.snail.storage.api.file.SnailFile;
+import org.snail.storage.api.file.*;
 
 /**
  * @author shifeng.luo
@@ -8,4 +8,13 @@ import org.snail.storage.api.file.SnailFile;
  */
 public class SnailSegmentFile implements SnailFile {
 
+	@Override
+	public SnailFileReader openReader(int offset) {
+		return null;
+	}
+
+	@Override
+	public SnailFileAppender appender() {
+		return null;
+	}
 }
