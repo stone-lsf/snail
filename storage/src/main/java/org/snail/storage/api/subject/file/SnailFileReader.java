@@ -1,4 +1,4 @@
-package org.snail.storage.api.file;
+package org.snail.storage.api.subject.file;
 
 /**
  * @author shifeng.luo

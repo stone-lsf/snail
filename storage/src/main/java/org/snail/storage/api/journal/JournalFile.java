@@ -1,6 +1,6 @@
 package org.snail.storage.api.journal;
 
-import org.snail.storage.api.file.SnailFile;
+import org.snail.storage.api.subject.file.SnailFile;
 
 /**
  * @author shifeng.luo

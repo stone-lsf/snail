@@ -4,7 +4,7 @@ package org.snail.storage.api.entry;
  * @author shifeng.luo
  * @version created on 2019-11-19 13:14
  */
-public abstract class AbstractEntry implements Entry{
+public abstract class AbstractEntry implements Entry {
 
 	/**
 	 * 实际读取数据的crc32
