@@ -1,4 +1,4 @@
-package org.snail.storage.segment.subject.file;
+package org.snail.storage.impl.subject.file;
 
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
@@ -6,9 +6,9 @@ import org.snail.storage.api.subject.file.SnailFileReader;
 
 /**
  * @author shifeng.luo
- * @version created on 2019-11-19 13:57
+ * @version created on 2019-11-25 13:23
  */
-public class SnailSegmentFile implements SnailFile {
+public class SnailMappedFile implements SnailFile {
 
 	@Override
 	public SnailFileReader openReader(int offset) {

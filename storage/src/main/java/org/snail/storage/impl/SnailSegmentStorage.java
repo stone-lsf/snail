@@ -1,4 +1,4 @@
-package org.snail.storage.segment;
+package org.snail.storage.impl;
 
 import com.google.common.base.Preconditions;
 import org.snail.common.util.FileUtil;
