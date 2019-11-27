@@ -1,6 +1,7 @@
 package org.snail.storage.impl.subject.index;
 
 import org.snail.storage.api.subject.file.SnailFileAppender;
+import org.snail.storage.api.subject.index.Indexed;
 
 /**
  * @author shifeng.luo
@@ -12,5 +13,20 @@ public class SnailIndexAppender implements SnailFileAppender {
 
 	public SnailIndexAppender(SnailFileAppender delegate) {
 		this.delegate = delegate;
+	}
+
+	@Override
+	public Indexed append(long sequence, byte[] data) {
+		return null;
+	}
+
+	@Override
+	public void flush() {
+
+	}
+
+	@Override
+	public void close() {
+
 	}
 }

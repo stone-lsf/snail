@@ -14,7 +14,13 @@ import java.util.zip.CRC32;
 @Setter
 public class SnailEntry extends AbstractEntry {
 
-	private static final int FIX_HEADER_SIZE = 4 + 4 + 8 + 4 + 2;
+	private static final int LENGTH_SIZE = 4;
+	private static final int FIX_HEADER_SIZE = LENGTH_SIZE + CRC_SIZE + 1 + 4 + 8 + 4 + 1;
+
+	/**
+	 * 版本号
+	 */
+	private byte version;
 
 	/**
 	 * 消息首部大小
@@ -32,11 +38,6 @@ public class SnailEntry extends AbstractEntry {
 	private int offset;
 
 	/**
-	 * 版本号
-	 */
-	private byte version;
-
-	/**
 	 * 压缩算法
 	 */
 	private byte compress;
@@ -47,16 +48,17 @@ public class SnailEntry extends AbstractEntry {
 	private byte[] payload;
 
 	@Override
-	public int getSize() {
+	public int getLength() {
 		int dataSize = (payload == null ? 0 : payload.length);
 		return FIX_HEADER_SIZE + dataSize;
 	}
 
 	@Override
 	public byte[] serialize() {
-		int size = getSize();
+		int size = this.getLength();
 
 		ByteBuffer buffer = ByteBuffer.allocate(size);
+		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(FIX_HEADER_SIZE);
 		buffer.putLong(sequence);
@@ -96,5 +98,32 @@ public class SnailEntry extends AbstractEntry {
 			this.payload = new byte[data.length - headSize];
 			buffer.get(payload);
 		}
+	}
+
+	public void write(ByteBuffer buffer) {
+		int position = buffer.position();
+		int length = this.getLength();
+
+		buffer.putInt(length);
+		buffer.putInt(0);
+		buffer.putInt(FIX_HEADER_SIZE);
+		buffer.putLong(sequence);
+		buffer.putInt(offset);
+		buffer.put(version);
+		buffer.put(compress);
+
+		if (payload != null) {
+			buffer.put(payload);
+		}
+
+		CRC32 crc32 = new CRC32();
+
+		byte[] array = buffer.array();
+
+		int offset = LENGTH_SIZE + CRC_SIZE;
+		crc32.update(array, position + offset,   length - offset);
+
+		int crc32Value = (int) crc32.getValue();
+		buffer.putInt(position + LENGTH_SIZE, crc32Value);
 	}
 }

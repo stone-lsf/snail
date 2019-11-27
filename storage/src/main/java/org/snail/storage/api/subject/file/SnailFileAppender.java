@@ -11,4 +11,6 @@ public interface SnailFileAppender {
 	Indexed append(long sequence, byte[] data);
 
 	void flush();
+
+	void close();
 }

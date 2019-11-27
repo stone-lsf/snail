@@ -12,7 +12,7 @@ public interface Entry {
 
 	void setOffset(int offset);
 
-	int getSize();
+	int getLength();
 
 	byte[] serialize();
 

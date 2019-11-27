@@ -42,13 +42,13 @@ public class IndexEntry extends AbstractEntry {
 	}
 
 	@Override
-	public int getSize() {
+	public int getLength() {
 		return SIZE;
 	}
 
 	@Override
 	public byte[] serialize() {
-		int size = getSize();
+		int size = this.getLength();
 		ByteBuffer buffer = ByteBuffer.allocate(size);
 
 		buffer.putInt(crc32);

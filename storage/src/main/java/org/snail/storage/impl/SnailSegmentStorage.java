@@ -17,9 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SnailSegmentStorage implements SnailStorage {
 
-	private final byte version = 1;
-	private final byte compress = 0;
-
 	private final String path;
 
 	private AtomicBoolean started = new AtomicBoolean(false);

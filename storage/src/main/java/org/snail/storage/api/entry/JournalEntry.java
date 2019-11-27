@@ -36,14 +36,14 @@ public class JournalEntry extends AbstractEntry {
 	private byte[] payload;
 
 	@Override
-	public int getSize() {
+	public int getLength() {
 		int payloadLength = payload == null ? 0 : payload.length;
 		return HEADER_SIZE + payloadLength;
 	}
 
 	@Override
 	public byte[] serialize() {
-		int size = getSize();
+		int size = this.getLength();
 		ByteBuffer buffer = ByteBuffer.allocate(size);
 		buffer.putInt(0);
 		buffer.putInt(subject);
