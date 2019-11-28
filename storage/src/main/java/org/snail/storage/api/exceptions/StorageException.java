@@ -1,4 +1,4 @@
-package org.snail.storage.api;
+package org.snail.storage.api.exceptions;
 
 /**
  * @author shifeng.luo
@@ -37,6 +37,16 @@ public class StorageException extends RuntimeException {
 	public static class OutOfDiskSpace extends StorageException {
 
 		public OutOfDiskSpace(String message) {
+			super(message);
+		}
+	}
+
+	/**
+	 * Exception thrown when data was bad.
+	 */
+	public static class BadDataException extends StorageException {
+
+		public BadDataException(String message) {
 			super(message);
 		}
 	}

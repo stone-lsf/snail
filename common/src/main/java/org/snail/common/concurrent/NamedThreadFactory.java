@@ -1,4 +1,4 @@
-package org.snail.common.util.concurrent;
+package org.snail.common.concurrent;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.SuppressPackageLocation;

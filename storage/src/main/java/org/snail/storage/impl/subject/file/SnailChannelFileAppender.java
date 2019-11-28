@@ -1,8 +1,9 @@
 package org.snail.storage.impl.subject.file;
 
 import lombok.extern.slf4j.Slf4j;
-import org.snail.common.util.concurrent.NamedThreadFactory;
-import org.snail.storage.api.StorageException;
+import org.snail.common.concurrent.NamedThreadFactory;
+import org.snail.storage.api.exceptions.StorageException;
+import org.snail.storage.api.entry.Entry;
 import org.snail.storage.api.entry.SnailEntry;
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
@@ -25,7 +26,7 @@ import static org.snail.storage.impl.StorageConfig.FILE_BUFFER_SIZE;
  * @version created on 2019-11-25 13:54
  */
 @Slf4j
-public class SnailChannelFileAppender implements SnailFileAppender {
+public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppender<T> {
 
 	private final SnailFile file;
 	private final FileChannel channel;
@@ -61,7 +62,7 @@ public class SnailChannelFileAppender implements SnailFileAppender {
 		int length = entry.getLength();
 		ByteBuffer input = this.input;
 		if (input.remaining() > length) {
-			entry.write(input);
+			entry.writeTo(input);
 		} else {
 			switchBuffer();
 		}

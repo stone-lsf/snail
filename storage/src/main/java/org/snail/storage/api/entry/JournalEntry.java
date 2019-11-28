@@ -76,4 +76,9 @@ public class JournalEntry extends AbstractEntry {
 		this.payload = new byte[data.length - HEADER_SIZE];
 		buffer.get(payload);
 	}
+
+	@Override
+	public boolean checkEnough(ByteBuffer buffer) {
+		return false;
+	}
 }

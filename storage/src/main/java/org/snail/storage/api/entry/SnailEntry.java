@@ -54,76 +54,58 @@ public class SnailEntry extends AbstractEntry {
 	}
 
 	@Override
-	public byte[] serialize() {
-		int size = this.getLength();
+	public void writeTo(ByteBuffer buffer) {
+		int position = buffer.position();
+		int length = this.getLength();
 
-		ByteBuffer buffer = ByteBuffer.allocate(size);
+		buffer.putInt(length - LENGTH_SIZE);
 		buffer.putInt(0);
-		buffer.putInt(0);
+		buffer.put(version);
 		buffer.putInt(FIX_HEADER_SIZE);
 		buffer.putLong(sequence);
 		buffer.putInt(offset);
-		buffer.put(version);
 		buffer.put(compress);
 
 		if (payload != null) {
 			buffer.put(payload);
 		}
 
-		byte[] array = buffer.array();
+		int crc32Value = calculateCrc32(buffer, position, length);
+		buffer.putInt(position + LENGTH_SIZE, crc32Value);
+	}
 
-		CRC32 crc32 = new CRC32();
-		crc32.update(array, CRC_SIZE, size - CRC_SIZE);
-		int crc32Value = (int) crc32.getValue();
-		buffer.putInt(0, crc32Value);
-
-		return array;
+	public boolean checkEnough(ByteBuffer buffer) {
+		buffer.mark();
+		int length = buffer.getInt();
+		boolean enough = buffer.remaining() >= length;
+		buffer.reset();
+		return enough;
 	}
 
 	@Override
-	public void deserialize(byte[] data) {
-		CRC32 crc32 = new CRC32();
-		crc32.update(data, CRC_SIZE, data.length - CRC_SIZE);
-		super.actualCrc32 = (int) crc32.getValue();
-
-		ByteBuffer buffer = ByteBuffer.wrap(data);
+	public void readFrom(ByteBuffer buffer) {
+		int position = buffer.position();
+		int length = buffer.getInt();
+		super.actualCrc32 = calculateCrc32(buffer, position, length);
 		this.crc32 = buffer.getInt();
+
+		this.version = buffer.get();
 		this.headSize = buffer.getInt();
 		this.sequence = buffer.getLong();
 		this.offset = buffer.getInt();
-		this.version = buffer.get();
 		this.compress = buffer.get();
 
-		if (data.length > headSize) {
-			this.payload = new byte[data.length - headSize];
+		if (length > headSize) {
+			this.payload = new byte[length - headSize];
 			buffer.get(payload);
 		}
 	}
 
-	public void write(ByteBuffer buffer) {
-		int position = buffer.position();
-		int length = this.getLength();
-
-		buffer.putInt(length);
-		buffer.putInt(0);
-		buffer.putInt(FIX_HEADER_SIZE);
-		buffer.putLong(sequence);
-		buffer.putInt(offset);
-		buffer.put(version);
-		buffer.put(compress);
-
-		if (payload != null) {
-			buffer.put(payload);
-		}
-
+	private int calculateCrc32(ByteBuffer buffer, int position, int length) {
 		CRC32 crc32 = new CRC32();
-
 		byte[] array = buffer.array();
-
 		int offset = LENGTH_SIZE + CRC_SIZE;
-		crc32.update(array, position + offset,   length - offset);
-
-		int crc32Value = (int) crc32.getValue();
-		buffer.putInt(position + LENGTH_SIZE, crc32Value);
+		crc32.update(array, position + offset, length - offset);
+		return (int) crc32.getValue();
 	}
 }

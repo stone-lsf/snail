@@ -1,6 +1,9 @@
 package org.snail.storage.impl.subject.file;
 
-import org.snail.storage.api.StorageException;
+import lombok.extern.slf4j.Slf4j;
+import org.snail.common.util.ReflectionUtil;
+import org.snail.storage.api.exceptions.StorageException;
+import org.snail.storage.api.entry.Entry;
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
 import org.snail.storage.api.subject.file.SnailFileReader;
@@ -14,13 +17,16 @@ import java.nio.file.StandardOpenOption;
  * @author shifeng.luo
  * @version created on 2019-11-19 13:57
  */
-public class SnailChannelFile implements SnailFile {
+@Slf4j
+public class SnailChannelFile<T extends Entry> implements SnailFile<T> {
 
 	private final File file;
 	private final SnailFileAppender appender;
+	private final Class<T> entryClass;
 
 	public SnailChannelFile(File file) {
 		this.file = file;
+		this.entryClass = ReflectionUtil.getSuperClassGenericType(this.getClass());
 		this.appender = new SnailChannelFileAppender(this, openChannel(file));
 	}
 
@@ -33,18 +39,28 @@ public class SnailChannelFile implements SnailFile {
 	}
 
 	@Override
-	public SnailFileReader openReader(int offset) {
+	public SnailFileReader<T> openReader(int offset) {
 		return null;
 	}
 
 	@Override
-	public SnailFileAppender appender() {
+	public SnailFileAppender<T> appender() {
 		return appender;
 	}
 
 	@Override
 	public boolean isOpen() {
 		return false;
+	}
+
+	@Override
+	public T createEntry() {
+		try {
+			return entryClass.newInstance();
+		} catch (Exception e) {
+			log.error("new entry instance caught", e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

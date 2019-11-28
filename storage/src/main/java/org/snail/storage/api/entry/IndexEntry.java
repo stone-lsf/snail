@@ -77,4 +77,9 @@ public class IndexEntry extends AbstractEntry {
 		this.offset = buffer.getInt();
 		this.sequence = buffer.getLong();
 	}
+
+	@Override
+	public boolean checkEnough(ByteBuffer buffer) {
+		return false;
+	}
 }

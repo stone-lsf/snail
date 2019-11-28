@@ -1,5 +1,7 @@
 package org.snail.storage.api.entry;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author shifeng.luo
  * @version created on 2019-11-19 13:13
@@ -14,9 +16,11 @@ public interface Entry {
 
 	int getLength();
 
-	byte[] serialize();
+	void writeTo(ByteBuffer buffer);
 
-	void deserialize(byte[] data);
+	void readFrom(ByteBuffer buffer);
 
 	boolean validCrc32();
+
+	boolean checkEnough(ByteBuffer buffer);
 }
