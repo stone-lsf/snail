@@ -14,7 +14,6 @@ import java.util.zip.CRC32;
 @Setter
 public class SnailEntry extends AbstractEntry {
 
-	private static final int LENGTH_SIZE = 4;
 	private static final int FIX_HEADER_SIZE = LENGTH_SIZE + CRC_SIZE + 1 + 4 + 8 + 4 + 1;
 
 	/**
@@ -58,7 +57,7 @@ public class SnailEntry extends AbstractEntry {
 		int position = buffer.position();
 		int length = this.getLength();
 
-		buffer.putInt(length - LENGTH_SIZE);
+		buffer.putInt(length);
 		buffer.putInt(0);
 		buffer.put(version);
 		buffer.putInt(FIX_HEADER_SIZE);
@@ -77,7 +76,7 @@ public class SnailEntry extends AbstractEntry {
 	public boolean checkEnough(ByteBuffer buffer) {
 		buffer.mark();
 		int length = buffer.getInt();
-		boolean enough = buffer.remaining() >= length;
+		boolean enough = buffer.remaining() >= length-LENGTH_SIZE;
 		buffer.reset();
 		return enough;
 	}

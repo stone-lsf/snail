@@ -37,7 +37,7 @@ public class SnailChannelFileAppenderTest extends BaseTest {
 	public void append() {
 		log.info("=============="+new Date());
 		String value = "test";
-		for (long i=0;i<1000000L;i++){
+		for (long i=0;i<100L;i++){
 			String data = value+i;
 			appender.append(i,data.getBytes());
 		}

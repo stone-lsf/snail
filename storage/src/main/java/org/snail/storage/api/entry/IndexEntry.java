@@ -47,6 +47,15 @@ public class IndexEntry extends AbstractEntry {
 	}
 
 	@Override
+	public void writeTo(ByteBuffer buffer) {
+
+	}
+
+	@Override
+	public void readFrom(ByteBuffer buffer) {
+
+	}
+
 	public byte[] serialize() {
 		int size = this.getLength();
 		ByteBuffer buffer = ByteBuffer.allocate(size);
@@ -65,7 +74,6 @@ public class IndexEntry extends AbstractEntry {
 		return array;
 	}
 
-	@Override
 	public void deserialize(byte[] data) {
 		CRC32 crc32 = new CRC32();
 		crc32.update(data, CRC_SIZE, data.length - CRC_SIZE);

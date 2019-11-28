@@ -40,6 +40,8 @@ public interface SnailFile<T extends Entry> extends Closeable {
 	 */
 	T createEntry();
 
+	T createEntry(long sequence, byte[] data);
+
 	@Override
 	void close();
 

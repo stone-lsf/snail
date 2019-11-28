@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 public interface Entry {
 
 	int CRC_SIZE = 4;
+	int LENGTH_SIZE = 4;
 
 	int getOffset();
 

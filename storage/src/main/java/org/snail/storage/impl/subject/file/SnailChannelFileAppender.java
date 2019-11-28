@@ -2,13 +2,11 @@ package org.snail.storage.impl.subject.file;
 
 import lombok.extern.slf4j.Slf4j;
 import org.snail.common.concurrent.NamedThreadFactory;
-import org.snail.storage.api.exceptions.StorageException;
 import org.snail.storage.api.entry.Entry;
-import org.snail.storage.api.entry.SnailEntry;
+import org.snail.storage.api.exceptions.StorageException;
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
 import org.snail.storage.api.subject.index.Indexed;
-import org.snail.storage.impl.StorageConfig;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,7 +26,7 @@ import static org.snail.storage.impl.StorageConfig.FILE_BUFFER_SIZE;
 @Slf4j
 public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppender<T> {
 
-	private final SnailFile file;
+	private final SnailFile<T> file;
 	private final FileChannel channel;
 
 	private final Object lock = new Object();
@@ -40,7 +38,7 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 															  new NamedThreadFactory("FileAppender"));
 	private int offset;
 
-	public SnailChannelFileAppender(SnailFile file, FileChannel channel) {
+	public SnailChannelFileAppender(SnailFile<T> file, FileChannel channel) {
 		this.file = file;
 		this.channel = channel;
 		output.flip();
@@ -53,12 +51,7 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 
 	@Override
 	public Indexed append(long sequence, byte[] data) {
-		SnailEntry entry = new SnailEntry();
-		entry.setSequence(sequence);
-		entry.setPayload(data);
-		entry.setVersion(StorageConfig.VERSION);
-		entry.setCompress(StorageConfig.COMPRESS);
-
+		T entry = file.createEntry(sequence, data);
 		int length = entry.getLength();
 		ByteBuffer input = this.input;
 		if (input.remaining() > length) {
@@ -77,12 +70,13 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 	@Override
 	public void flush() {
 		switchBuffer();
-		output();
+		doFlush();
 	}
 
 	@Override
 	public void close() {
 		try {
+			flush();
 			closed.set(true);
 			channel.force(true);
 			channel.close();
@@ -94,7 +88,7 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 	private void output() {
 		synchronized (lock) {
 			try {
-				while (output.remaining() <= 0) {
+				if (output.remaining() <= 0) {
 					try {
 						lock.wait();
 					} catch (InterruptedException e) {
@@ -103,7 +97,21 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 				}
 
 				channel.write(output);
-				output.clear();
+			} catch (IOException e) {
+				log.error("write data caught", e);
+				throw new StorageException(e);
+			}
+		}
+	}
+
+	private void doFlush() {
+		synchronized (lock) {
+			try {
+				if (output.remaining() <= 0) {
+					return;
+				}
+
+				channel.write(output);
 			} catch (IOException e) {
 				log.error("write data caught", e);
 				throw new StorageException(e);

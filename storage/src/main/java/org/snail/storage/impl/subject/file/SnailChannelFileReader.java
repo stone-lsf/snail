@@ -82,11 +82,21 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 		T entry = file.createEntry();
 
 		try {
-			if (!entry.checkEnough(memory)) {
-				memory.compact();
-				memory.flip();
+			if (!hasEnoughDataFor(entry)) {
+				if (memory.remaining() > 0) {
+					memory.compact();
+					memory.flip();
+				} else {
+					memory.flip().limit(memory.capacity());
+				}
+
 				channel.read(memory);
 				memory.flip();
+			}
+
+			if (!hasEnoughDataFor(entry)) {
+				nextEntry = null;
+				return;
 			}
 
 			entry.readFrom(memory);
@@ -97,5 +107,9 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 		} catch (Exception e) {
 			throw new StorageException(e);
 		}
+	}
+
+	private boolean hasEnoughDataFor(T entry) {
+		return memory.remaining() >= Entry.LENGTH_SIZE && entry.checkEnough(memory);
 	}
 }

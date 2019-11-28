@@ -5,11 +5,13 @@ import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
 import org.snail.storage.api.subject.file.SnailFileReader;
 
+import java.io.File;
+
 /**
  * @author shifeng.luo
  * @version created on 2019-11-25 13:23
  */
-public class SnailMappedFile<T extends Entry> implements SnailFile<T> {
+public abstract class MappedFile<T extends Entry> implements SnailFile<T> {
 
 	@Override
 	public SnailFileReader<T> openReader(int offset) {
@@ -34,5 +36,10 @@ public class SnailMappedFile<T extends Entry> implements SnailFile<T> {
 	@Override
 	public void close() {
 
+	}
+
+	@Override
+	public File getFile() {
+		return null;
 	}
 }
