@@ -1,6 +1,7 @@
 package org.snail.storage.impl.subject.file;
 
 import lombok.extern.slf4j.Slf4j;
+import org.snail.common.util.ReflectionUtil;
 import org.snail.storage.api.entry.Entry;
 import org.snail.storage.api.exceptions.StorageException;
 import org.snail.storage.api.subject.file.SnailFile;
@@ -22,6 +23,8 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 	private final SnailFile<T> file;
 	private final ByteBuffer memory;
 	private final FileChannel channel;
+	private final Class<T> entryClass;
+
 	private T currentEntry;
 	private T nextEntry;
 
@@ -35,6 +38,7 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 		} catch (IOException e) {
 			throw new StorageException(e);
 		}
+		this.entryClass = ReflectionUtil.getSuperClassGenericType(this.getClass());
 	}
 
 	@Override
@@ -79,9 +83,9 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 	}
 
 	private void readNext() {
-		T entry = file.createEntry();
-
 		try {
+			T entry = entryClass.newInstance();
+
 			if (!hasEnoughDataFor(entry)) {
 				if (memory.remaining() > 0) {
 					memory.compact();

@@ -4,7 +4,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.snail.storage.BaseTest;
-import org.snail.storage.api.entry.Entry;
 import org.snail.storage.api.entry.SnailEntry;
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileReader;
@@ -23,7 +22,7 @@ public class SnailChannelFileReaderTest extends BaseTest {
 
 	@Before
 	public void setUp() throws Exception {
-		snailFile = new SnailChannelFile(file);
+		snailFile = new SnailChannelFile<>(file);
 		reader = snailFile.openReader(0);
 	}
 

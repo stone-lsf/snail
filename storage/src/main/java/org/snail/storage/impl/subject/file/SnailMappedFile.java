@@ -11,7 +11,15 @@ import java.io.File;
  * @author shifeng.luo
  * @version created on 2019-11-25 13:23
  */
-public abstract class MappedFile<T extends Entry> implements SnailFile<T> {
+public class SnailMappedFile<T extends Entry> implements SnailFile<T> {
+
+	protected final File file;
+	protected final SnailFileAppender<T> appender;
+
+	protected SnailMappedFile(File file) {
+		this.file = file;
+		this.appender = new SnailMappedFileAppender<>();
+	}
 
 	@Override
 	public SnailFileReader<T> openReader(int offset) {
@@ -23,15 +31,27 @@ public abstract class MappedFile<T extends Entry> implements SnailFile<T> {
 		return null;
 	}
 
+
+	@Override
+	public void append(T entry) {
+		appender.append(entry);
+	}
+
+	@Override
+	public int getCurrentOffset() {
+		return appender.getCurrentOffset();
+	}
+
+	@Override
+	public void flush() {
+		appender.flush();
+	}
+
 	@Override
 	public boolean isOpen() {
 		return false;
 	}
 
-	@Override
-	public T createEntry() {
-		return null;
-	}
 
 	@Override
 	public void close() {

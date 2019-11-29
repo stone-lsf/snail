@@ -5,8 +5,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.snail.storage.BaseTest;
+import org.snail.storage.api.entry.SnailEntry;
 import org.snail.storage.api.subject.file.SnailFile;
-import org.snail.storage.api.subject.file.SnailFileAppender;
+import org.snail.storage.impl.StorageConfig;
 
 import java.io.File;
 import java.util.Date;
@@ -19,13 +20,13 @@ import java.util.Date;
 public class SnailChannelFileAppenderTest extends BaseTest {
 
 	private File file = new File(storagePath + "/test.log");
-	private SnailFile snailFile;
-	private SnailFileAppender appender;
+	private SnailFile<SnailEntry> snailFile;
+
 
 	@Before
 	public void setUp() throws Exception {
-		snailFile = new SnailChannelFile(file);
-		appender = snailFile.appender();
+		snailFile = new SnailChannelFile<>(file);
+
 	}
 
 	@After
@@ -35,18 +36,27 @@ public class SnailChannelFileAppenderTest extends BaseTest {
 
 	@Test
 	public void append() {
-		log.info("=============="+new Date());
+		log.info("==============" + new Date());
 		String value = "test";
-		for (long i=0;i<100L;i++){
-			String data = value+i;
-			appender.append(i,data.getBytes());
+		for (long i = 0; i < 100L; i++) {
+			String data = value + i;
+
+			int offset = snailFile.getCurrentOffset();
+			SnailEntry entry = new SnailEntry();
+			entry.setSequence(i);
+			entry.setPayload(data.getBytes());
+			entry.setVersion(StorageConfig.VERSION);
+			entry.setCompress(StorageConfig.COMPRESS);
+			entry.setOffset(offset);
+
+			snailFile.append(entry);
 		}
 
-		log.info("=============="+new Date());
+		log.info("==============" + new Date());
 	}
 
 	@Test
 	public void flush() {
-		appender.flush();
+		snailFile.flush();
 	}
 }

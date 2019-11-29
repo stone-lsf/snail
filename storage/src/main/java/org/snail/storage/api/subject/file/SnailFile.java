@@ -33,14 +33,20 @@ public interface SnailFile<T extends Entry> extends Closeable {
 	 */
 	boolean isOpen();
 
-	/**
-	 * create a entry
-	 *
-	 * @return entry
-	 */
-	T createEntry();
+	void append(T entry);
 
-	T createEntry(long sequence, byte[] data);
+	int getCurrentOffset();
+
+	void flush();
+
+//	/**
+//	 * create a entry
+//	 *
+//	 * @return entry
+//	 */
+//	T createEntry();
+//
+//	T createEntry(long sequence, int offset, byte[] data);
 
 	@Override
 	void close();

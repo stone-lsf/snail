@@ -14,12 +14,7 @@ import java.util.zip.CRC32;
 @Setter
 public class IndexEntry extends AbstractEntry {
 
-	private static final int SIZE = 4 + +4 + 4 + 8;
-
-	/**
-	 * 消息在文件中的位置
-	 */
-	private int location;
+	private static final int SIZE = 4 + 4 + 4 + 8;
 
 	/**
 	 * 文件偏移
@@ -27,16 +22,21 @@ public class IndexEntry extends AbstractEntry {
 	private int offset;
 
 	/**
-	 * 消息序号
+	 * 索引的消息序号
 	 */
-	private long sequence;
+	private long indexSequence;
+
+	/**
+	 * 索引的消息在文件中的偏移
+	 */
+	private int indexOffset;
 
 
 	public static IndexEntry from(long sequence, int location) {
 		IndexEntry entry = new IndexEntry();
 
-		entry.setSequence(sequence);
-		entry.setLocation(location);
+		entry.setIndexSequence(sequence);
+		entry.setIndexOffset(location);
 
 		return entry;
 	}
@@ -61,9 +61,9 @@ public class IndexEntry extends AbstractEntry {
 		ByteBuffer buffer = ByteBuffer.allocate(size);
 
 		buffer.putInt(crc32);
-		buffer.putInt(location);
+		buffer.putInt(indexOffset);
 		buffer.putInt(offset);
-		buffer.putLong(sequence);
+		buffer.putLong(indexSequence);
 
 		byte[] array = buffer.array();
 		CRC32 crc32 = new CRC32();
@@ -81,9 +81,9 @@ public class IndexEntry extends AbstractEntry {
 
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		this.crc32 = buffer.getInt();
-		this.location = buffer.getInt();
+		this.indexOffset = buffer.getInt();
 		this.offset = buffer.getInt();
-		this.sequence = buffer.getLong();
+		this.indexSequence = buffer.getLong();
 	}
 
 	@Override

@@ -9,7 +9,11 @@ import org.snail.storage.api.subject.index.Indexed;
  */
 public interface SnailFileAppender<T extends Entry> {
 
-	Indexed append(long sequence, byte[] data);
+	void append(T entry);
+
+//	Indexed append(long sequence, byte[] data);
+
+	int getCurrentOffset();
 
 	void flush();
 

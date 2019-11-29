@@ -50,8 +50,7 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 	}
 
 	@Override
-	public Indexed append(long sequence, byte[] data) {
-		T entry = file.createEntry(sequence, data);
+	public void append(T entry) {
 		int length = entry.getLength();
 		ByteBuffer input = this.input;
 		if (input.remaining() > length) {
@@ -60,10 +59,29 @@ public class SnailChannelFileAppender<T extends Entry> implements SnailFileAppen
 			switchBuffer();
 		}
 
-		Indexed indexed = new Indexed(sequence, data, offset);
 		offset += entry.getLength();
+	}
 
-		return indexed;
+//	@Override
+//	public Indexed append(long sequence, byte[] data) {
+//		T entry = file.createEntry(sequence, offset, data);
+//		int length = entry.getLength();
+//		ByteBuffer input = this.input;
+//		if (input.remaining() > length) {
+//			entry.writeTo(input);
+//		} else {
+//			switchBuffer();
+//		}
+//
+//		Indexed indexed = new Indexed(sequence, data, offset);
+//		offset += entry.getLength();
+//
+//		return indexed;
+//	}
+
+	@Override
+	public int getCurrentOffset() {
+		return offset;
 	}
 
 
