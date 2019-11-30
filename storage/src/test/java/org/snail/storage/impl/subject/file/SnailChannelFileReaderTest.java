@@ -22,7 +22,7 @@ public class SnailChannelFileReaderTest extends BaseTest {
 
 	@Before
 	public void setUp() throws Exception {
-		snailFile = new SnailChannelFile<>(file);
+		snailFile = new SnailChannelFile<>(file, SnailEntry.class);
 		reader = snailFile.openReader(0);
 	}
 
@@ -32,7 +32,7 @@ public class SnailChannelFileReaderTest extends BaseTest {
 
 	@Test
 	public void next() {
-		while (reader.hasNext()){
+		while (reader.hasNext()) {
 			SnailEntry next = reader.next();
 			System.out.println(new String(next.getPayload()));
 		}

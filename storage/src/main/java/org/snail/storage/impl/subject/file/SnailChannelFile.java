@@ -19,13 +19,15 @@ import static java.nio.file.StandardOpenOption.*;
  * @version created on 2019-11-19 13:57
  */
 @Slf4j
-public  class SnailChannelFile<T extends Entry> implements SnailFile<T> {
+public class SnailChannelFile<T extends Entry> implements SnailFile<T> {
 
 	protected final File file;
 	protected final SnailFileAppender<T> appender;
+	private final Class<T> entryClass;
 
-	public SnailChannelFile(File file) {
+	public SnailChannelFile(File file, Class<T> entryClass) {
 		this.file = file;
+		this.entryClass = entryClass;
 		this.appender = new SnailChannelFileAppender<>(this, openChannel(file, CREATE, READ, WRITE));
 	}
 
@@ -40,7 +42,7 @@ public  class SnailChannelFile<T extends Entry> implements SnailFile<T> {
 	@Override
 	public SnailFileReader<T> openReader(int offset) {
 		FileChannel channel = openChannel(file, READ);
-		return new SnailChannelFileReader<>(this, channel, offset);
+		return new SnailChannelFileReader<>(this, entryClass, channel, offset);
 	}
 
 	@Override

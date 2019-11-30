@@ -1,9 +1,8 @@
 package org.snail.storage.impl.subject.segment;
 
-import org.snail.storage.api.entry.IndexEntry;
 import org.snail.storage.api.entry.SnailEntry;
 import org.snail.storage.api.subject.file.SnailFile;
-import org.snail.storage.api.subject.index.IndexPolicy;
+import org.snail.storage.api.subject.index.IndexFile;
 import org.snail.storage.api.subject.index.Indexed;
 import org.snail.storage.api.subject.segment.Segment;
 import org.snail.storage.api.subject.segment.SegmentAppender;
@@ -17,15 +16,13 @@ public class SnailSegmentAppender implements SegmentAppender {
 
 	private final Segment segment;
 	private final SnailFile<SnailEntry> snailFile;
-	private final SnailFile<IndexEntry> indexFile;
-	private final IndexPolicy policy;
+	private final IndexFile indexFile;
 
-	public SnailSegmentAppender(Segment segment, SnailFile<SnailEntry> snailFile, SnailFile<IndexEntry> indexFile,
-								IndexPolicy policy) {
+
+	public SnailSegmentAppender(Segment segment, SnailFile<SnailEntry> snailFile, IndexFile indexFile) {
 		this.segment = segment;
 		this.snailFile = snailFile;
 		this.indexFile = indexFile;
-		this.policy = policy;
 	}
 
 
@@ -41,16 +38,7 @@ public class SnailSegmentAppender implements SegmentAppender {
 		entry.setOffset(offset);
 
 		snailFile.append(entry);
-		if (policy.triggerIndex(sequence, offset)) {
-			IndexEntry indexEntry = new IndexEntry();
-			indexEntry.setIndexSequence(sequence);
-			indexEntry.setOffset(offset);
-
-			int indexFileOffset = indexFile.getCurrentOffset();
-			indexEntry.setOffset(indexFileOffset);
-
-			indexFile.append(indexEntry);
-		}
+		indexFile.index(sequence,offset);
 
 		return new Indexed(sequence, data, offset);
 	}
@@ -58,7 +46,8 @@ public class SnailSegmentAppender implements SegmentAppender {
 
 	@Override
 	public void flush() {
-
+		snailFile.flush();
+		indexFile.flush();
 	}
 
 	@Override

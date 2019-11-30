@@ -25,7 +25,7 @@ public class SnailChannelFileAppenderTest extends BaseTest {
 
 	@Before
 	public void setUp() throws Exception {
-		snailFile = new SnailChannelFile<>(file);
+		snailFile = new SnailChannelFile<>(file,SnailEntry.class);
 
 	}
 

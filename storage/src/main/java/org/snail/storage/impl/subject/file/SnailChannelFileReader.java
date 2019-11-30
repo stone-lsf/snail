@@ -28,7 +28,7 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 	private T currentEntry;
 	private T nextEntry;
 
-	public SnailChannelFileReader(SnailFile<T> file, FileChannel channel, int startOffset) {
+	public SnailChannelFileReader(SnailFile<T> file,Class<T> entryClass, FileChannel channel, int startOffset) {
 		this.file = file;
 		this.channel = channel;
 		this.memory = ByteBuffer.allocate(StorageConfig.FILE_READ_BUFFER_SIZE);
@@ -38,7 +38,7 @@ public class SnailChannelFileReader<T extends Entry> implements SnailFileReader<
 		} catch (IOException e) {
 			throw new StorageException(e);
 		}
-		this.entryClass = ReflectionUtil.getSuperClassGenericType(this.getClass());
+		this.entryClass = entryClass;
 	}
 
 	@Override

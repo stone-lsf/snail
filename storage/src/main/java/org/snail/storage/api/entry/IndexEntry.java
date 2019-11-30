@@ -14,7 +14,7 @@ import java.util.zip.CRC32;
 @Setter
 public class IndexEntry extends AbstractEntry {
 
-	private static final int SIZE = 4 + 4 + 4 + 8;
+	private static final int LENGTH = CRC_SIZE + 4 + 8 + 4;
 
 	/**
 	 * 文件偏移
@@ -41,53 +41,46 @@ public class IndexEntry extends AbstractEntry {
 		return entry;
 	}
 
-	@Override
 	public int getLength() {
-		return SIZE;
+		return LENGTH;
 	}
 
 	@Override
 	public void writeTo(ByteBuffer buffer) {
+		int position = buffer.position();
 
+		buffer.putInt(0);
+		buffer.putInt(offset);
+		buffer.putLong(indexSequence);
+		buffer.putInt(indexOffset);
+
+		int crc32Value = calculateCrc32(buffer, position);
+		buffer.putInt(position, crc32Value);
 	}
 
 	@Override
 	public void readFrom(ByteBuffer buffer) {
-
-	}
-
-	public byte[] serialize() {
-		int size = this.getLength();
-		ByteBuffer buffer = ByteBuffer.allocate(size);
-
-		buffer.putInt(crc32);
-		buffer.putInt(indexOffset);
-		buffer.putInt(offset);
-		buffer.putLong(indexSequence);
-
-		byte[] array = buffer.array();
-		CRC32 crc32 = new CRC32();
-		crc32.update(array, CRC_SIZE, size - CRC_SIZE);
-		int crc32Value = (int) crc32.getValue();
-		buffer.putInt(0, crc32Value);
-
-		return array;
-	}
-
-	public void deserialize(byte[] data) {
-		CRC32 crc32 = new CRC32();
-		crc32.update(data, CRC_SIZE, data.length - CRC_SIZE);
-		super.actualCrc32 = (int) crc32.getValue();
-
-		ByteBuffer buffer = ByteBuffer.wrap(data);
+		int position = buffer.position();
+		super.actualCrc32 = calculateCrc32(buffer, position);
 		this.crc32 = buffer.getInt();
-		this.indexOffset = buffer.getInt();
+
 		this.offset = buffer.getInt();
 		this.indexSequence = buffer.getLong();
+		this.indexOffset = buffer.getInt();
 	}
 
 	@Override
 	public boolean checkEnough(ByteBuffer buffer) {
-		return false;
+		buffer.mark();
+		boolean enough = buffer.remaining() >= LENGTH;
+		buffer.reset();
+		return enough;
+	}
+
+	private int calculateCrc32(ByteBuffer buffer, int position) {
+		CRC32 crc32 = new CRC32();
+		byte[] array = buffer.array();
+		crc32.update(array, position + CRC_SIZE, LENGTH - CRC_SIZE);
+		return (int) crc32.getValue();
 	}
 }
