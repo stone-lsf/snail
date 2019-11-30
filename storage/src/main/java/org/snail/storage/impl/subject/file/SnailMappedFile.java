@@ -1,11 +1,19 @@
 package org.snail.storage.impl.subject.file;
 
 import org.snail.storage.api.entry.Entry;
+import org.snail.storage.api.exceptions.StorageException;
 import org.snail.storage.api.subject.file.SnailFile;
 import org.snail.storage.api.subject.file.SnailFileAppender;
 import org.snail.storage.api.subject.file.SnailFileReader;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * @author shifeng.luo
@@ -15,10 +23,20 @@ public class SnailMappedFile<T extends Entry> implements SnailFile<T> {
 
 	protected final File file;
 	protected final SnailFileAppender<T> appender;
+	private final Class<T> entryClass;
 
-	protected SnailMappedFile(File file) {
+	protected SnailMappedFile(File file, Class<T> entryClass) {
 		this.file = file;
-		this.appender = new SnailMappedFileAppender<>();
+		this.entryClass = entryClass;
+		this.appender = new SnailMappedFileAppender<>(this,  openChannel(file, CREATE, READ, WRITE), 1024*1024*1024);
+	}
+
+	private FileChannel openChannel(File file, OpenOption... openOptions) {
+		try {
+			return FileChannel.open(file.toPath(), openOptions);
+		} catch (IOException e) {
+			throw new StorageException(e);
+		}
 	}
 
 	@Override
