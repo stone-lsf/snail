@@ -20,6 +20,7 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 
 	private final SnailFile<T> snailFile;
 	private final FileChannel channel;
+	private final ByteBuffer writeBuffer;
 	private final MappedByteBuffer buffer;
 	private final int fileSize;
 	private int offset;
@@ -28,6 +29,7 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 		this.snailFile = snailFile;
 		this.channel = channel;
 		this.fileSize = fileSize;
+		this.writeBuffer = ByteBuffer.allocate(512 * 1024);
 		try {
 			this.buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
 		} catch (Exception e) {
@@ -38,8 +40,10 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 	@Override
 	public void append(T entry) {
 		int length = entry.getLength();
-		if (buffer.remaining() > length) {
-			entry.writeTo(buffer);
+		if (writeBuffer.remaining() > length) {
+			entry.writeTo(writeBuffer);
+		} else {
+			write();
 		}
 
 		offset += entry.getLength();
@@ -52,22 +56,31 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 
 	@Override
 	public void flush() {
-		this.buffer.force();
+		write();
+		buffer.force();
+	}
+
+	private void write() {
+		writeBuffer.flip();
+		buffer.put(writeBuffer);
+		writeBuffer.clear();
+		writeBuffer.flip().limit(writeBuffer.capacity());
 	}
 
 	@Override
 	public void close() {
-
+		flush();
+		clean();
 	}
 
-	public static void clean(final ByteBuffer buffer) {
+	public void clean() {
 		if (buffer == null || !buffer.isDirect() || buffer.capacity() == 0) {
 			return;
 		}
 		invoke(invoke(viewed(buffer), "cleaner"), "clean");
 	}
 
-	private static Object invoke(final Object target, final String methodName, final Class<?>... args) {
+	private Object invoke(final Object target, final String methodName, final Class<?>... args) {
 		return AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			@Override
 			public Object run() {
@@ -82,7 +95,7 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 		});
 	}
 
-	private static Method method(Object target, String methodName, Class<?>[] args)
+	private Method method(Object target, String methodName, Class<?>[] args)
 			throws NoSuchMethodException {
 		try {
 			return target.getClass().getMethod(methodName, args);
@@ -91,11 +104,11 @@ public class SnailMappedFileAppender<T extends Entry> implements SnailFileAppend
 		}
 	}
 
-	private static ByteBuffer viewed(ByteBuffer buffer) {
+	private ByteBuffer viewed(ByteBuffer buffer) {
 		String methodName = "viewedBuffer";
 		Method[] methods = buffer.getClass().getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().equals("attachment")) {
+		for (Method method : methods) {
+			if (method.getName().equals("attachment")) {
 				methodName = "attachment";
 				break;
 			}

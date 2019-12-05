@@ -73,7 +73,7 @@ public class SnailMappedFile<T extends Entry> implements SnailFile<T> {
 
 	@Override
 	public void close() {
-
+		appender.close();
 	}
 
 	@Override

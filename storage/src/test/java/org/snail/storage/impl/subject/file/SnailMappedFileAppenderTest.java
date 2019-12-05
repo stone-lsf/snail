@@ -1,5 +1,6 @@
 package org.snail.storage.impl.subject.file;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +18,9 @@ import static org.junit.Assert.*;
  * @author shifeng.luo
  * @version created on 2019/12/1 上午12:54
  */
+@Slf4j
 public class SnailMappedFileAppenderTest extends BaseTest {
-	private File file = new File(storagePath + "/test.log");
+	private File file = new File(storagePath + "/test_map.log");
 	private SnailFile<SnailEntry> snailFile;
 
 
@@ -30,13 +32,14 @@ public class SnailMappedFileAppenderTest extends BaseTest {
 
 	@After
 	public void tearDown() throws Exception {
+		snailFile.flush();
 	}
 
 	@Test
 	public void append() throws Exception {
 		log.info("==============" + new Date());
 		String value = "test";
-		for (long i = 0; i < 100L; i++) {
+		for (long i = 0; i < 100000L; i++) {
 			String data = value + i;
 
 			int offset = snailFile.getCurrentOffset();
